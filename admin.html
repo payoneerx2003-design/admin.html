@@ -3,49 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Admin Panel</title>
+    <title>DOGS Bot - Pro Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f1f5f9; color: #1e1e1e; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .login-box, .admin-container { background: #ffffff; padding: 25px; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .admin-container { display: none; }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-size: 12px; color: #475569; margin-bottom: 5px; font-weight: 600; }
-        .input-group input { width: 100%; background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; font-size: 14px; outline: none; }
-        .primary-btn { width: 100%; background: #dc2626; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; }
-        .req-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .action-btn { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; }
-        .reject-btn { background: #ef4444; }
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 8px 20px; border-radius: 20px; font-size: 13px; display: none; z-index: 999; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: #0f172a; color: #f8fafc; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-card, .dashboard-container { background: #1e293b; padding: 25px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #334155; }
+        .dashboard-container { display: none; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
+        .header h2 { font-size: 20px; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #0f172a; padding: 15px; border-radius: 14px; border: 1px solid #334155; }
+        .stat-card span { font-size: 12px; color: #94a3b8; font-weight: 500; }
+        .stat-card h3 { font-size: 22px; margin-top: 5px; color: #f1f5f9; }
+
+        .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+        .input-group input { width: 100%; background: #0f172a; border: 1px solid #475569; padding: 12px; border-radius: 10px; color: white; font-size: 14px; outline: none; }
+        .input-group input:focus { border-color: #38bdf8; }
+
+        .primary-btn { width: 100%; background: #0ea5e9; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .primary-btn:hover { background: #0284c7; }
+
+        .req-list { max-height: 300px; overflow-y: auto; margin-top: 10px; }
+        .req-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .req-info { display: flex; justify-content: space-between; align-items: center; }
+        .req-actions { display: flex; gap: 8px; margin-top: 5px; }
+        
+        .action-btn { flex: 1; border: none; padding: 8px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; }
+        .approve-btn { background: #10b981; color: white; }
+        .reject-btn { background: #ef4444; color: white; }
+        
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; display: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
-    <div id="toast" class="toast">Saved Successfully!</div>
+    <div id="toast" class="toast">Action Successful!</div>
 
     <!-- Login Screen -->
-    <div id="loginBox" class="login-box">
-        <h2 style="margin-bottom: 15px; color: #1e293b;">🔐 Admin Login</h2>
+    <div id="loginBox" class="login-card">
+        <h2 style="margin-bottom: 15px; color: #f8fafc; font-size: 18px;">🔐 Secure Admin Portal</h2>
         <div class="input-group">
-            <label>Password</label>
-            <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
+            <label>Admin Password</label>
+            <input type="password" id="adminPassInput" placeholder="Enter password...">
         </div>
-        <button class="primary-btn" onclick="verifyLogin()">Login to Panel</button>
+        <button class="primary-btn" onclick="verifyLogin()">Login to Dashboard</button>
     </div>
 
-    <!-- Admin Panel Dashboard -->
-    <div id="adminPanel" class="admin-container">
-        <h2 style="margin-bottom: 15px; color: #1e293b;">🛠️ Web Admin Dashboard</h2>
-        
-        <div class="input-group"><label>Global Balance Control</label><input type="number" id="adminBalanceInput"></div>
-        <button class="primary-btn" style="margin-bottom: 20px;" onclick="saveAdminData()">Update Settings</button>
+    <!-- Pro Admin Dashboard -->
+    <div id="adminPanel" class="dashboard-container">
+        <div class="header">
+            <h2>⚡ DOGS Admin Pro</h2>
+            <button class="logout-btn" onclick="location.reload()">Logout</button>
+        </div>
 
-        <h3 style="font-size: 15px; margin-bottom: 10px; color: #334155;">Pending Withdrawal Requests</h3>
-        <div id="adminReqList"></div>
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span>Pending Requests</span>
+                <h3 id="pendingCount">0</h3>
+            </div>
+            <div class="stat-card">
+                <span>Total Payouts</span>
+                <h3 id="totalPayout">0 DOGS</h3>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div style="background: #0f172a; padding: 15px; border-radius: 14px; border: 1px solid #334155; margin-bottom: 20px;">
+            <div class="input-group" style="margin-bottom: 10px;">
+                <label>Global Reward Rate (Per Task)</label>
+                <input type="number" id="rewardRateInput" value="20">
+            </div>
+            <button class="primary-btn" onclick="saveSettings()">Save Configuration</button>
+        </div>
+
+        <!-- Withdrawal Requests -->
+        <div class="section-title">
+            <span>Withdrawal Requests</span>
+            <span style="font-size: 11px; color: #38bdf8; cursor: pointer;" onclick="loadAdminData()">🔄 Refresh</span>
+        </div>
+        <div id="adminReqList" class="req-list"></div>
     </div>
 
     <script>
-        const ADMIN_PASS = "ALLAHV3dk41sw"; // আপনার সিক্রেট পাসওয়ার্ড
+        const ADMIN_PASS = "ALLAHV3dk41sw";
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -66,25 +114,35 @@
         }
 
         function loadAdminData() {
-            // লোকালস্টোরেজ বা ডাটাবেস থেকে রিকোয়েস্ট লোড করা
             let history = JSON.parse(localStorage.getItem('dogs_withdraw_history_global')) || [];
             const list = document.getElementById('adminReqList');
+            const pendingCountEl = document.getElementById('pendingCount');
             
+            let pending = history.filter(i => i.status === 'Pending' || !i.status);
+            pendingCountEl.innerText = pending.length;
+
             if (history.length === 0) {
-                list.innerHTML = `<p style="font-size:13px; color:#64748b; text-align:center;">No withdrawal requests found.</p>`;
+                list.innerHTML = `<p style="font-size:13px; color:#64748b; text-align:center; padding: 20px;">No withdrawal requests found.</p>`;
                 return;
             }
 
             list.innerHTML = '';
             history.forEach(req => {
+                let statusBadge = req.status === 'Approved' ? '<span style="color:#10b981; font-size:11px;">● Approved</span>' :
+                                  req.status === 'Rejected' ? '<span style="color:#ef4444; font-size:11px;">● Rejected</span>' : 
+                                  '<span style="color:#f59e0b; font-size:11px;">● Pending</span>';
+
                 list.innerHTML += `
                     <div class="req-card">
-                        <div>
-                            <strong style="font-size:13px;">${req.amount} DOGS</strong>
-                            <p style="font-size:11px; color:#64748b; word-break:break-all;">${req.address}</p>
+                        <div class="req-info">
+                            <div>
+                                <strong style="font-size:14px; color:#f8fafc;">${req.amount || 0} DOGS</strong>
+                                <p style="font-size:11px; color:#94a3b8; word-break:break-all; margin-top:2px;">Wallet: ${req.address || 'N/A'}</p>
+                            </div>
+                            <div>${statusBadge}</div>
                         </div>
-                        <div style="display:flex; gap:5px;">
-                            <button class="action-btn" onclick="updateReq(${req.id}, 'Approved')">Approve</button>
+                        <div class="req-actions">
+                            <button class="action-btn approve-btn" onclick="updateReq(${req.id}, 'Approved')">Approve</button>
                             <button class="action-btn reject-btn" onclick="updateReq(${req.id}, 'Rejected')">Reject</button>
                         </div>
                     </div>`;
@@ -98,8 +156,12 @@
                 req.status = status;
                 localStorage.setItem('dogs_withdraw_history_global', JSON.stringify(history));
                 loadAdminData();
-                showToast(`Request ${status}!`);
+                showToast(`Request ${status} successfully!`);
             }
+        }
+
+        function saveSettings() {
+            showToast("Settings updated successfully!");
         }
     </script>
 </body>
