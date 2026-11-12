@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Admin Panel</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e1e1e; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-box, .admin-container { background: #ffffff; padding: 25px; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .admin-container { display: none; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: #475569; margin-bottom: 5px; font-weight: 600; }
+        .input-group input { width: 100%; background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; font-size: 14px; outline: none; }
+        .primary-btn { width: 100%; background: #dc2626; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .req-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .action-btn { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; }
+        .reject-btn { background: #ef4444; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 8px 20px; border-radius: 20px; font-size: 13px; display: none; z-index: 999; }
+    </style>
+</head>
+<body>
+
+    <div id="toast" class="toast">Saved Successfully!</div>
+
+    <!-- Login Screen -->
+    <div id="loginBox" class="login-box">
+        <h2 style="margin-bottom: 15px; color: #1e293b;">🔐 Admin Login</h2>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="adminPassInput" placeholder="Enter Admin Password">
+        </div>
+        <button class="primary-btn" onclick="verifyLogin()">Login to Panel</button>
+    </div>
+
+    <!-- Admin Panel Dashboard -->
+    <div id="adminPanel" class="admin-container">
+        <h2 style="margin-bottom: 15px; color: #1e293b;">🛠️ Web Admin Dashboard</h2>
+        
+        <div class="input-group"><label>Global Balance Control</label><input type="number" id="adminBalanceInput"></div>
+        <button class="primary-btn" style="margin-bottom: 20px;" onclick="saveAdminData()">Update Settings</button>
+
+        <h3 style="font-size: 15px; margin-bottom: 10px; color: #334155;">Pending Withdrawal Requests</h3>
+        <div id="adminReqList"></div>
+    </div>
+
+    <script>
+        const ADMIN_PASS = "ALLAHV3dk41sw"; // আপনার সিক্রেট পাসওয়ার্ড
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 2000);
+        }
+
+        function verifyLogin() {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === ADMIN_PASS) {
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadAdminData();
+            } else {
+                alert("Incorrect Password!");
+            }
+        }
+
+        function loadAdminData() {
+            // লোকালস্টোরেজ বা ডাটাবেস থেকে রিকোয়েস্ট লোড করা
+            let history = JSON.parse(localStorage.getItem('dogs_withdraw_history_global')) || [];
+            const list = document.getElementById('adminReqList');
+            
+            if (history.length === 0) {
+                list.innerHTML = `<p style="font-size:13px; color:#64748b; text-align:center;">No withdrawal requests found.</p>`;
+                return;
+            }
+
+            list.innerHTML = '';
+            history.forEach(req => {
+                list.innerHTML += `
+                    <div class="req-card">
+                        <div>
+                            <strong style="font-size:13px;">${req.amount} DOGS</strong>
+                            <p style="font-size:11px; color:#64748b; word-break:break-all;">${req.address}</p>
+                        </div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="action-btn" onclick="updateReq(${req.id}, 'Approved')">Approve</button>
+                            <button class="action-btn reject-btn" onclick="updateReq(${req.id}, 'Rejected')">Reject</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function updateReq(id, status) {
+            let history = JSON.parse(localStorage.getItem('dogs_withdraw_history_global')) || [];
+            let req = history.find(i => i.id === id);
+            if (req) {
+                req.status = status;
+                localStorage.setItem('dogs_withdraw_history_global', JSON.stringify(history));
+                loadAdminData();
+                showToast(`Request ${status}!`);
+            }
+        }
+    </script>
+</body>
+</html>
