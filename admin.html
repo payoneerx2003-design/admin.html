@@ -8,36 +8,45 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .login-card, .dashboard-container { background: #1e293b; padding: 25px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #334155; }
+        .login-card, .dashboard-container { background: #1e293b; padding: 25px; border-radius: 20px; width: 100%; max-width: 650px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #334155; }
         .dashboard-container { display: none; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
         .header h2 { font-size: 20px; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
         .logout-btn { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: #0f172a; padding: 15px; border-radius: 14px; border: 1px solid #334155; }
         .stat-card span { font-size: 12px; color: #94a3b8; font-weight: 500; }
-        .stat-card h3 { font-size: 22px; margin-top: 5px; color: #f1f5f9; }
+        .stat-card h3 { font-size: 20px; margin-top: 5px; color: #f1f5f9; }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; overflow-x: auto; }
+        .tab-btn { background: #0f172a; border: 1px solid #334155; color: #94a3b8; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { background: #0ea5e9; color: white; border-color: #0ea5e9; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
         .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
         
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
-        .input-group input { width: 100%; background: #0f172a; border: 1px solid #475569; padding: 12px; border-radius: 10px; color: white; font-size: 14px; outline: none; }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; font-weight: 600; }
+        .input-group input, .input-group textarea { width: 100%; background: #0f172a; border: 1px solid #475569; padding: 10px; border-radius: 8px; color: white; font-size: 13px; outline: none; }
         .input-group input:focus { border-color: #38bdf8; }
 
-        .primary-btn { width: 100%; background: #0ea5e9; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .primary-btn { width: 100%; background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; }
         .primary-btn:hover { background: #0284c7; }
 
-        .req-list { max-height: 300px; overflow-y: auto; margin-top: 10px; }
-        .req-card { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .req-info { display: flex; justify-content: space-between; align-items: center; }
-        .req-actions { display: flex; gap: 8px; margin-top: 5px; }
+        .list-container { max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .card-item { background: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 6px; }
+        .card-info { display: flex; justify-content: space-between; align-items: center; }
+        .card-actions { display: flex; gap: 6px; margin-top: 4px; }
         
-        .action-btn { flex: 1; border: none; padding: 8px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; }
+        .action-btn { flex: 1; border: none; padding: 6px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 11px; }
         .approve-btn { background: #10b981; color: white; }
         .reject-btn { background: #ef4444; color: white; }
+        .ban-btn { background: #7f1d1d; color: #fca5a5; }
+        .unban-btn { background: #065f46; color: #6ee7b7; }
         
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; display: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     </style>
@@ -63,33 +72,80 @@
             <button class="logout-btn" onclick="location.reload()">Logout</button>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span>Pending Requests</span>
-                <h3 id="pendingCount">0</h3>
-            </div>
-            <div class="stat-card">
-                <span>Total Payouts</span>
-                <h3 id="totalPayout">0 DOGS</h3>
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('statsTab', this)">📊 Overview</button>
+            <button class="tab-btn" onclick="switchTab('usersTab', this)">👥 Users</button>
+            <button class="tab-btn" onclick="switchTab('withdrawTab', this)">💸 Withdrawals</button>
+            <button class="tab-btn" onclick="switchTab('tasksTab', this)">📋 Tasks</button>
+        </div>
+
+        <!-- TAB 1: Stats & Overview -->
+        <div id="statsTab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span>Today's Payout</span>
+                    <h3 id="todayPayout">0 DOGS</h3>
+                </div>
+                <div class="stat-card">
+                    <span>Monthly Payout</span>
+                    <h3 id="monthlyPayout">0 DOGS</h3>
+                </div>
+                <div class="stat-card">
+                    <span>Total Users</span>
+                    <h3 id="totalUsersCount">0</h3>
+                </div>
+                <div class="stat-card">
+                    <span>Pending Withdrawals</span>
+                    <h3 id="pendingCount">0</h3>
+                </div>
             </div>
         </div>
 
-        <!-- Settings Section -->
-        <div style="background: #0f172a; padding: 15px; border-radius: 14px; border: 1px solid #334155; margin-bottom: 20px;">
-            <div class="input-group" style="margin-bottom: 10px;">
-                <label>Global Reward Rate (Per Task)</label>
-                <input type="number" id="rewardRateInput" value="20">
+        <!-- TAB 2: User List (Telegram Usernames & Ban/Unban) -->
+        <div id="usersTab" class="tab-content">
+            <div class="section-title"><span>User List (Telegram)</span></div>
+            <div id="userListContainer" class="list-container">
+                <!-- Dynamic Users will load here -->
             </div>
-            <button class="primary-btn" onclick="saveSettings()">Save Configuration</button>
         </div>
 
-        <!-- Withdrawal Requests -->
-        <div class="section-title">
-            <span>Withdrawal Requests</span>
-            <span style="font-size: 11px; color: #38bdf8; cursor: pointer;" onclick="loadAdminData()">🔄 Refresh</span>
+        <!-- TAB 3: Withdrawal Requests -->
+        <div id="withdrawTab" class="tab-content">
+            <div class="section-title">
+                <span>Withdrawal Requests</span>
+                <span style="font-size: 11px; color: #38bdf8; cursor: pointer;" onclick="loadAdminData()">🔄 Refresh</span>
+            </div>
+            <div id="adminReqList" class="list-container">
+                <!-- Dynamic Withdrawals will load here -->
+            </div>
         </div>
-        <div id="adminReqList" class="req-list"></div>
+
+        <!-- TAB 4: Task Manager (Add New Tasks) -->
+        <div id="tasksTab" class="tab-content">
+            <div class="section-title"><span>Create New Task</span></div>
+            <div style="background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 15px;">
+                <div class="input-group">
+                    <label>Task Title / Description</label>
+                    <input type="text" id="taskTitle" placeholder="e.g. Join Telegram Channel">
+                </div>
+                <div class="input-group">
+                    <label>Task Link</label>
+                    <input type="text" id="taskLink" placeholder="https://t.me/...">
+                </div>
+                <div class="input-group">
+                    <label>Reward Amount (DOGS)</label>
+                    <input type="number" id="taskReward" placeholder="50">
+                </div>
+                <button class="primary-btn" onclick="addNewTask()">➕ Add Task</button>
+            </div>
+
+            <div class="section-title"><span>Existing Tasks</span></div>
+            <div id="taskListContainer" class="list-container">
+                <!-- Dynamic Tasks will load here -->
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -113,55 +169,170 @@
             }
         }
 
-        function loadAdminData() {
-            let history = JSON.parse(localStorage.getItem('dogs_withdraw_history_global')) || [];
-            const list = document.getElementById('adminReqList');
-            const pendingCountEl = document.getElementById('pendingCount');
-            
-            let pending = history.filter(i => i.status === 'Pending' || !i.status);
-            pendingCountEl.innerText = pending.length;
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
 
+        function loadAdminData() {
+            // Dummy or LocalStorage data binding
+            let history = JSON.parse(localStorage.getItem('dogs_withdraw_history_global')) || [
+                { id: 1, telegram: "@user_sample1", amount: 100, address: "UQD...sample", status: "Pending", date: new Date().toISOString() }
+            ];
+            
+            let users = JSON.parse(localStorage.getItem('dogs_users_list')) || [
+                { id: 1, telegram: "@cryptouser99", balance: 450, status: "Active" }
+            ];
+
+            let tasks = JSON.parse(localStorage.getItem('dogs_tasks_list')) || [
+                { id: 1, title: "Join Official Telegram", link: "https://t.me/", reward: 50 }
+            ];
+
+            // 1. Stats calculation
+            let pending = history.filter(i => i.status === 'Pending' || !i.status);
+            document.getElementById('pendingCount').innerText = pending.length;
+            document.getElementById('totalUsersCount').innerText = users.length;
+
+            let todayStr = new Date().toISOString().split('T')[0];
+            let currentMonthStr = todayStr.substring(0, 7); // YYYY-MM
+
+            let todayTotal = 0;
+            let monthTotal = 0;
+
+            history.forEach(item => {
+                if (item.status === 'Approved' && item.date) {
+                    let itemDate = item.date.split('T')[0];
+                    let itemMonth = itemDate.substring(0, 7);
+                    if (itemDate === todayStr) todayTotal += Number(item.amount || 0);
+                    if (itemMonth === currentMonthStr) monthTotal += Number(item.amount || 0);
+                }
+            });
+
+            document.getElementById('todayPayout').innerText = todayTotal + " DOGS";
+            document.getElementById('monthlyPayout').innerText = monthTotal + " DOGS";
+
+            // 2. Render Withdrawals
+            const reqList = document.getElementById('adminReqList');
             if (history.length === 0) {
-                list.innerHTML = `<p style="font-size:13px; color:#64748b; text-align:center; padding: 20px;">No withdrawal requests found.</p>`;
-                return;
+                reqList.innerHTML = `<p style="font-size:12px; color:#64748b; text-align:center; padding: 20px;">No withdrawal requests found.</p>`;
+            } else {
+                reqList.innerHTML = '';
+                history.forEach(req => {
+                    let statusBadge = req.status === 'Approved' ? '<span style="color:#10b981; font-size:11px;">● Approved</span>' :
+                                      req.status === 'Cancelled' ? '<span style="color:#ef4444; font-size:11px;">● Cancelled</span>' : 
+                                      '<span style="color:#f59e0b; font-size:11px;">● Pending</span>';
+
+                    reqList.innerHTML += `
+                        <div class="card-item">
+                            <div class="card-info">
+                                <div>
+                                    <strong style="font-size:13px; color:#f8fafc;">${req.amount || 0} DOGS (${req.telegram || '@unknown'})</strong>
+                                    <p style="font-size:11px; color:#94a3b8; word-break:break-all; margin-top:2px;">Wallet: ${req.address || 'N/A'}</p>
+                                </div>
+                                <div>${statusBadge}</div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="action-btn approve-btn" onclick="updateWithdraw(${req.id}, 'Approved')">Approve</button>
+                                <button class="action-btn reject-btn" onclick="updateWithdraw(${req.id}, 'Cancelled')">Cancel</button>
+                            </div>
+                        </div>`;
+                });
             }
 
-            list.innerHTML = '';
-            history.forEach(req => {
-                let statusBadge = req.status === 'Approved' ? '<span style="color:#10b981; font-size:11px;">● Approved</span>' :
-                                  req.status === 'Rejected' ? '<span style="color:#ef4444; font-size:11px;">● Rejected</span>' : 
-                                  '<span style="color:#f59e0b; font-size:11px;">● Pending</span>';
-
-                list.innerHTML += `
-                    <div class="req-card">
-                        <div class="req-info">
+            // 3. Render Users
+            const userContainer = document.getElementById('userListContainer');
+            userContainer.innerHTML = '';
+            users.forEach(u => {
+                let statusColor = u.status === 'Banned' ? 'color:#ef4444;' : 'color:#10b981;';
+                userContainer.innerHTML += `
+                    <div class="card-item">
+                        <div class="card-info">
                             <div>
-                                <strong style="font-size:14px; color:#f8fafc;">${req.amount || 0} DOGS</strong>
-                                <p style="font-size:11px; color:#94a3b8; word-break:break-all; margin-top:2px;">Wallet: ${req.address || 'N/A'}</p>
+                                <strong style="font-size:13px; color:#f8fafc;">${u.telegram || '@telegram_user'}</strong>
+                                <p style="font-size:11px; color:#94a3b8; margin-top:2px;">Balance: ${u.balance || 0} DOGS</p>
                             </div>
-                            <div>${statusBadge}</div>
+                            <div style="font-size:11px; ${statusColor} font-weight:600;">${u.status || 'Active'}</div>
                         </div>
-                        <div class="req-actions">
-                            <button class="action-btn approve-btn" onclick="updateReq(${req.id}, 'Approved')">Approve</button>
-                            <button class="action-btn reject-btn" onclick="updateReq(${req.id}, 'Rejected')">Reject</button>
+                        <div class="card-actions">
+                            ${u.status === 'Banned' ? 
+                                `<button class="action-btn unban-btn" onclick="toggleBan(${u.id}, 'Active')">Unban User</button>` :
+                                `<button class="action-btn ban-btn" onclick="toggleBan(${u.id}, 'Banned')">Ban User</button>`
+                            }
+                        </div>
+                    </div>`;
+            });
+
+            // 4. Render Tasks
+            const taskContainer = document.getElementById('taskListContainer');
+            taskContainer.innerHTML = '';
+            tasks.forEach(t => {
+                taskContainer.innerHTML += `
+                    <div class="card-item">
+                        <div class="card-info">
+                            <div>
+                                <strong style="font-size:13px; color:#f8fafc;">${t.title}</strong>
+                                <p style="font-size:11px; color:#38bdf8; margin-top:2px;">Reward: ${t.reward} DOGS</p>
+                            </div>
+                            <button class="action-btn reject-btn" style="flex:unset; padding:4px 8px;" onclick="deleteTask(${t.id})">Delete</button>
                         </div>
                     </div>`;
             });
         }
 
-        function updateReq(id, status) {
+        function updateWithdraw(id, status) {
             let history = JSON.parse(localStorage.getItem('dogs_withdraw_history_global')) || [];
             let req = history.find(i => i.id === id);
             if (req) {
                 req.status = status;
+                req.date = new Date().toISOString(); // update timestamp for accurate daily/monthly stats
                 localStorage.setItem('dogs_withdraw_history_global', JSON.stringify(history));
                 loadAdminData();
-                showToast(`Request ${status} successfully!`);
+                showToast(`Withdrawal ${status}!`);
             }
         }
 
-        function saveSettings() {
-            showToast("Settings updated successfully!");
+        function toggleBan(id, newStatus) {
+            let users = JSON.parse(localStorage.getItem('dogs_users_list')) || [];
+            let u = users.find(item => item.id === id);
+            if (u) {
+                u.status = newStatus;
+                localStorage.setItem('dogs_users_list', JSON.stringify(users));
+                loadAdminData();
+                showToast(`User status updated to ${newStatus}`);
+            }
+        }
+
+        function addNewTask() {
+            let title = document.getElementById('taskTitle').value;
+            let link = document.getElementById('taskLink').value;
+            let reward = document.getElementById('taskReward').value;
+
+            if (!title || !link || !reward) {
+                alert("Please fill in all task fields!");
+                return;
+            }
+
+            let tasks = JSON.parse(localStorage.getItem('dogs_tasks_list')) || [];
+            let newTask = { id: Date.now(), title, link, reward };
+            tasks.push(newTask);
+            localStorage.setItem('dogs_tasks_list', JSON.stringify(tasks));
+
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskLink').value = '';
+            document.getElementById('taskReward').value = '';
+
+            loadAdminData();
+            showToast("New Task Added Successfully!");
+        }
+
+        function deleteTask(id) {
+            let tasks = JSON.parse(localStorage.getItem('dogs_tasks_list')) || [];
+            tasks = tasks.filter(t => t.id !== id);
+            localStorage.setItem('dogs_tasks_list', JSON.stringify(tasks));
+            loadAdminData();
+            showToast("Task Deleted!");
         }
     </script>
 </body>
