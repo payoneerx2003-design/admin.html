@@ -177,7 +177,6 @@
         }
 
         function loadAdminData() {
-            // Dummy or LocalStorage data binding
             let history = JSON.parse(localStorage.getItem('dogs_withdraw_history_global')) || [
                 { id: 1, telegram: "@user_sample1", amount: 100, address: "UQD...sample", status: "Pending", date: new Date().toISOString() }
             ];
@@ -196,7 +195,7 @@
             document.getElementById('totalUsersCount').innerText = users.length;
 
             let todayStr = new Date().toISOString().split('T')[0];
-            let currentMonthStr = todayStr.substring(0, 7); // YYYY-MM
+            let currentMonthStr = todayStr.substring(0, 7);
 
             let todayTotal = 0;
             let monthTotal = 0;
@@ -286,7 +285,7 @@
             let req = history.find(i => i.id === id);
             if (req) {
                 req.status = status;
-                req.date = new Date().toISOString(); // update timestamp for accurate daily/monthly stats
+                req.date = new Date().toISOString();
                 localStorage.setItem('dogs_withdraw_history_global', JSON.stringify(history));
                 loadAdminData();
                 showToast(`Withdrawal ${status}!`);
